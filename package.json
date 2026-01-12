@@ -1,0 +1,24 @@
+{
+  "name": "vgt-bookstore",
+  "version": "1.0.0",
+  "private": true,
+  "description": "VGT Bookstore - Complete E-commerce Platform with Admin Dashboard",
+  "workspaces": [
+    "packages/*"
+  ],
+  "scripts": {
+    "dev:ecomm": "npm run dev --workspace=vgt-ecomm",
+    "dev:admin": "npm run dev --workspace=admin-dash",
+    "build:ecomm": "npm run build --workspace=vgt-ecomm",
+    "build:admin": "npm run build --workspace=admin-dash",
+    "seed": "npm run seed --workspace=shared"
+  },
+  "keywords": [
+    "bookstore",
+    "ecommerce",
+    "nextjs",
+    "mongodb"
+  ],
+  "author": "VGT Bookstore",
+  "license": "MIT"
+}
