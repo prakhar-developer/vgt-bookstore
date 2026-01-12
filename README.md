@@ -197,6 +197,9 @@ See [DEPLOYMENT.md](./DEPLOYMENT.md) for detailed deployment instructions for Ve
 ## 🤝 Contributing
 
 Contributions are welcome! Please feel free to submit a Pull Request.
+## Photos
+<img width="870" height="978" alt="image" src="https://github.com/user-attachments/assets/91555cab-7202-4f18-a8ac-f0dc5fd71bf5" />
+
 
 ## 📄 License
 
