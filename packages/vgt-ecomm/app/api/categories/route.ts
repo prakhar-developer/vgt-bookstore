@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-import connectDB from '../../../../../shared/lib/mongodb';
-import Category from '../../../../../shared/models/Category';
+import { connectDB, Category } from '@/lib/shared';
 
 export async function GET() {
   try {

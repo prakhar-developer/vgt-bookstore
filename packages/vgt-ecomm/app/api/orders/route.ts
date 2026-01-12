@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '../../../../../shared/lib/mongodb';
-import Order from '../../../../../shared/models/Order';
-import Book from '../../../../../shared/models/Book';
+import { connectDB, Order, Book } from '@/lib/shared';
 import { Resend } from 'resend';
 
 const resend = new Resend(process.env.RESEND_API_KEY);

@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '../../../../../../../shared/lib/mongodb';
-import Book from '../../../../../../../shared/models/Book';
-import { verifyToken, extractTokenFromHeader } from '../../../../../../../shared/lib/auth';
+import { connectDB, Book, verifyToken, extractTokenFromHeader } from '@/lib/shared';
 
 export async function PUT(
   request: NextRequest,

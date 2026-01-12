@@ -1,6 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '../../../../../shared/lib/mongodb';
-import Book from '../../../../../shared/models/Book';
+import { connectDB, Book } from '@/lib/shared';
 
 export async function GET(request: NextRequest) {
   try {

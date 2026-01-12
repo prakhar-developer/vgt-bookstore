@@ -1,8 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '../../../../../../shared/lib/mongodb';
-import Order from '../../../../../../shared/models/Order';
-import Book from '../../../../../../shared/models/Book';
-import { verifyToken, extractTokenFromHeader } from '../../../../../../shared/lib/auth';
+import { connectDB, Order, Book, verifyToken, extractTokenFromHeader } from '@/lib/shared';
 
 export async function GET(request: NextRequest) {
   try {

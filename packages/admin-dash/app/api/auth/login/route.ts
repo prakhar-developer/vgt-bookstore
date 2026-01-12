@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '../../../../../../shared/lib/mongodb';
-import Admin from '../../../../../../shared/models/Admin';
-import { comparePassword, generateToken } from '../../../../../../shared/lib/auth';
+import { connectDB, Admin, comparePassword, generateToken } from '@/lib/shared';
 
 export async function POST(request: NextRequest) {
   try {

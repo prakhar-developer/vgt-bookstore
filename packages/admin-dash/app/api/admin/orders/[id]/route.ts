@@ -1,7 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
-import connectDB from '../../../../../../../shared/lib/mongodb';
-import Order from '../../../../../../../shared/models/Order';
-import { verifyToken, extractTokenFromHeader } from '../../../../../../../shared/lib/auth';
+import { connectDB, Order, verifyToken, extractTokenFromHeader } from '@/lib/shared';
 
 export async function PATCH(
   request: NextRequest,
