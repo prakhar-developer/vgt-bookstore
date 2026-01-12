@@ -75,7 +75,12 @@ export default function CategoriesPage() {
 
   const handleEdit = (category: Category) => {
     setEditingCategory(category);
-    setFormData(category);
+    setFormData({
+      name: category.name,
+      slug: category.slug,
+      icon: category.icon,
+      description: category.description || '',
+    });
     setShowModal(true);
   };
 

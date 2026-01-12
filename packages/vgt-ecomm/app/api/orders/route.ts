@@ -2,8 +2,6 @@ import { NextRequest, NextResponse } from 'next/server';
 import { connectDB, Order, Book } from '@/lib/shared';
 import { Resend } from 'resend';
 
-const resend = new Resend(process.env.RESEND_API_KEY);
-
 function generateOrderId(): string {
   const timestamp = Date.now().toString(36);
   const random = Math.random().toString(36).substring(2, 7);
@@ -65,36 +63,39 @@ export async function POST(request: NextRequest) {
     });
 
     // Send confirmation email
-    try {
-      await resend.emails.send({
-        from: 'VGT Bookstore <onboarding@resend.dev>',
-        to: customerEmail,
-        subject: `Order Confirmation - ${orderId}`,
-        html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
-            <h2 style="color: #636B2F;">Order Confirmation</h2>
-            <p>Dear ${customerName},</p>
-            <p>Thank you for your order! Your order has been received and is being processed.</p>
-            
-            <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
-              <h3>Order Details</h3>
-              <p><strong>Order ID:</strong> ${orderId}</p>
-              <p><strong>Book:</strong> ${book.title}</p>
-              <p><strong>Author:</strong> ${book.author}</p>
-              <p><strong>Price:</strong> ₹${book.price}</p>
-              <p><strong>Status:</strong> Pending Verification</p>
+    if (process.env.RESEND_API_KEY) {
+      try {
+        const resend = new Resend(process.env.RESEND_API_KEY);
+        await resend.emails.send({
+          from: 'VGT Bookstore <onboarding@resend.dev>',
+          to: customerEmail,
+          subject: `Order Confirmation - ${orderId}`,
+          html: `
+            <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto;">
+              <h2 style="color: #636B2F;">Order Confirmation</h2>
+              <p>Dear ${customerName},</p>
+              <p>Thank you for your order! Your order has been received and is being processed.</p>
+              
+              <div style="background: #f5f5f5; padding: 20px; border-radius: 8px; margin: 20px 0;">
+                <h3>Order Details</h3>
+                <p><strong>Order ID:</strong> ${orderId}</p>
+                <p><strong>Book:</strong> ${book.title}</p>
+                <p><strong>Author:</strong> ${book.author}</p>
+                <p><strong>Price:</strong> ₹${book.price}</p>
+                <p><strong>Status:</strong> Pending Verification</p>
+              </div>
+              
+              <p>We will verify your payment and update you on the order status shortly.</p>
+              <p>If you have any questions, please don't hesitate to contact us.</p>
+              
+              <p>Best regards,<br/>VGT Bookstore Team</p>
             </div>
-            
-            <p>We will verify your payment and update you on the order status shortly.</p>
-            <p>If you have any questions, please don't hesitate to contact us.</p>
-            
-            <p>Best regards,<br/>VGT Bookstore Team</p>
-          </div>
-        `,
-      });
-    } catch (emailError) {
-      console.error('Error sending email:', emailError);
-      // Continue even if email fails
+          `,
+        });
+      } catch (emailError) {
+        console.error('Error sending email:', emailError);
+        // Continue even if email fails
+      }
     }
 
     return NextResponse.json({

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import axios from 'axios';
 import BookCard from '@/components/BookCard';
@@ -25,7 +25,7 @@ interface Category {
   slug: string;
 }
 
-export default function BooksPage() {
+function BooksContent() {
   const searchParams = useSearchParams();
   const [books, setBooks] = useState<Book[]>([]);
   const [categories, setCategories] = useState<Category[]>([]);
@@ -207,5 +207,13 @@ export default function BooksPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function BooksPage() {
+  return (
+    <Suspense fallback={<div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">Loading...</div>}>
+      <BooksContent />
+    </Suspense>
   );
 }
