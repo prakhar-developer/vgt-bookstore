@@ -12,7 +12,7 @@ const config: Config = {
       colors: {
         vgt: {
           primary: "#636B2F",
-          dark: "#3D4127",
+          dark: "#484d2c",
           surface: "#BAC095",
           highlight: "#D4DE95",
         },

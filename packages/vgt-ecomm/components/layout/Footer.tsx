@@ -3,8 +3,8 @@ import { Mail, Phone, MapPin } from 'lucide-react';
 
 export default function Footer() {
   return (
-    <footer className="bg-vgt-dark text-white mt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <footer className="bg-[#3D4127] rgb(121 126 23) mt-16">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg: px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
           {/* About */}
           <div>
@@ -19,24 +19,24 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/" className="text-gray-300 hover:text-vgt-highlight transition">
+                <Link href="/" className="text-gray-300 hover: text-[#D4DE95] transition">
                   Home
                 </Link>
               </li>
               <li>
-                <Link href="/books" className="text-gray-300 hover:text-vgt-highlight transition">
+                <Link href="/books" className="text-gray-300 hover:text-[#D4DE95] transition">
                   Browse Books
                 </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-vgt-highlight transition">
+                <Link href="/about" className="text-gray-300 hover:text-[#D4DE95] transition">
                   About Us
-                </a>
+                </Link>
               </li>
               <li>
-                <a href="#" className="text-gray-300 hover:text-vgt-highlight transition">
+                <Link href="/contact" className="text-gray-300 hover:text-[#D4DE95] transition">
                   Contact
-                </a>
+                </Link>
               </li>
             </ul>
           </div>
@@ -46,15 +46,15 @@ export default function Footer() {
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
             <ul className="space-y-3 text-sm">
               <li className="flex items-center space-x-2">
-                <Mail className="h-4 w-4 text-vgt-highlight" />
+                <Mail className="h-4 w-4 text-[#D4DE95]" />
                 <span className="text-gray-300">support@vgtbookstore.com</span>
               </li>
               <li className="flex items-center space-x-2">
-                <Phone className="h-4 w-4 text-vgt-highlight" />
+                <Phone className="h-4 w-4 text-[#D4DE95]" />
                 <span className="text-gray-300">+91 123 456 7890</span>
               </li>
               <li className="flex items-center space-x-2">
-                <MapPin className="h-4 w-4 text-vgt-highlight" />
+                <MapPin className="h-4 w-4 text-[#D4DE95]" />
                 <span className="text-gray-300">New Delhi, India</span>
               </li>
             </ul>
