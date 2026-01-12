@@ -1,92 +1,96 @@
-import connectDB from '../lib/mongodb';
-import { Admin, Category } from '../models';
-import { hashPassword } from '../lib/auth';
+import mongoose from "mongoose"
+import bcrypt from "bcryptjs"
+import dotenv from "dotenv"
+import path from "path"
 
-const ADMIN_EMAIL = process.env.ADMIN_EMAIL || 'admin.vgt@gmail.com';
-const ADMIN_PASSWORD = process.env.ADMIN_PASSWORD || 'Admin@12345';
+// Load environment variables
+dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
-const defaultCategories = [
-  {
-    name: 'Fiction',
-    slug: 'fiction',
-    icon: 'BookOpen',
-    description: 'Explore fictional stories and novels'
-  },
-  {
-    name: 'Non-Fiction',
-    slug: 'non-fiction',
-    icon: 'Book',
-    description: 'Real stories and educational content'
-  },
-  {
-    name: 'Science & Technology',
-    slug: 'science-technology',
-    icon: 'Atom',
-    description: 'Books about science and technology'
-  },
-  {
-    name: 'Self-Help',
-    slug: 'self-help',
-    icon: 'Heart',
-    description: 'Personal development and motivation'
-  },
-  {
-    name: 'Business & Economics',
-    slug: 'business-economics',
-    icon: 'TrendingUp',
-    description: 'Business strategies and economic theories'
-  },
-  {
-    name: 'History',
-    slug: 'history',
-    icon: 'Clock',
-    description: 'Historical events and biographies'
-  }
-];
+import { Admin, Category } from "../models"
+
+const MONGODB_URI = process.env.MONGODB_URI
+
+if (!MONGODB_URI) {
+  console.error("❌ Error:  MONGODB_URI not found in environment variables")
+  process.exit(1)
+}
 
 async function seed() {
   try {
-    console.log('🌱 Starting database seeding...');
-
-    // Connect to MongoDB
-    await connectDB();
-
-    // Create admin user
-    const existingAdmin = await Admin.findOne({ email: ADMIN_EMAIL });
+    console.log("🌱 Starting database seeding...")
     
+    // Connect to MongoDB
+    await mongoose.connect(MONGODB_URI as string)
+    console.log("✅ Connected to MongoDB")
+
+    // Create Admin User
+    const existingAdmin = await Admin.findOne({ email: "admin.vgt@gmail.com" })
     if (!existingAdmin) {
-      const hashedPassword = await hashPassword(ADMIN_PASSWORD);
+      const hashedPassword = await bcrypt. hash("Admin@12345", 10)
       await Admin.create({
-        email: ADMIN_EMAIL,
+        email: "admin.vgt@gmail.com",
         password: hashedPassword,
-        name: 'VGT Admin',
-        role: 'super_admin'
-      });
-      console.log('✅ Admin user created');
-      console.log(`   Email: ${ADMIN_EMAIL}`);
-      console.log(`   Password: ${ADMIN_PASSWORD}`);
+        name: "VGT Admin",
+        role: "super_admin",
+      })
+      console.log("✅ Admin user created")
+      console.log("   Email: admin.vgt@gmail.com")
+      console.log("   Password: Admin@12345")
     } else {
-      console.log('ℹ️  Admin user already exists');
+      console.log("ℹ️  Admin user already exists")
     }
 
-    // Create categories
-    for (const category of defaultCategories) {
-      const existingCategory = await Category.findOne({ slug: category.slug });
-      
-      if (!existingCategory) {
-        await Category.create(category);
-        console.log(`✅ Category created: ${category.name}`);
+    // Create Categories
+    const categories = [
+      {
+        name: "Competitive Exams",
+        slug: "competitive-exams",
+        icon: "trophy",
+        description: "Books for competitive exam preparation",
+      },
+      {
+        name:  "Programming",
+        slug: "programming",
+        icon: "code",
+        description: "Programming and software development books",
+      },
+      {
+        name: "School & College",
+        slug: "school-college",
+        icon: "graduation-cap",
+        description: "Academic textbooks and study materials",
+      },
+      {
+        name: "Self Growth",
+        slug: "self-growth",
+        icon: "sparkles",
+        description: "Personal development and self-help books",
+      },
+    ]
+
+    for (const cat of categories) {
+      const existing = await Category.findOne({ slug: cat.slug })
+      if (!existing) {
+        await Category.create(cat)
+        console.log(`✅ Category created: ${cat.name}`)
       } else {
-        console.log(`ℹ️  Category already exists: ${category.name}`);
+        console. log(`ℹ️  Category already exists: ${cat.name}`)
       }
     }
 
-    console.log('🎉 Database seeding completed successfully!');
-    process.exit(0);
+    console.log("\n🎉 Database seeded successfully!")
+    console.log("\n📝 Next Steps:")
+    console.log("1. Run e-commerce site:  cd ../vgt-ecomm && npm run dev")
+    console.log("2. Run admin dashboard: cd ../admin-dash && npm run dev")
+    console.log("3. Login to admin:  http://localhost:3001/login")
+    console.log("   Email: admin.vgt@gmail.com")
+    console.log("   Password: Admin@12345")
+    
+    process.exit(0)
   } catch (error) {
-    console.error('❌ Error seeding database:', error);
-    process.exit(1);
+    console.error("❌ Error seeding database:", error)
+    process.exit(1)
   }
 }
 
-seed();
+seed()

@@ -1,41 +1,45 @@
-import mongoose, { Schema, Model } from 'mongoose';
-import { IAdmin } from '../types';
+import mongoose, { Schema, Model } from "mongoose"
+import { IAdmin } from "../types"
 
 const AdminSchema = new Schema<IAdmin>(
   {
     email: {
       type: String,
-      required: [true, 'Email is required'],
-      unique: true,
-      trim: true,
+      required: [true, "Email is required"],
       lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address']
+      trim: true,
+      validate: {
+        validator: function (v: string) {
+          return /^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/.test(v)
+        },
+        message: "Please provide a valid email address",
+      },
     },
     password: {
       type: String,
-      required: [true, 'Password is required'],
-      minlength: [6, 'Password must be at least 6 characters']
+      required: [true, "Password is required"],
+      // REMOVE select: false OR keep it and use .select('+password') in queries
     },
     name: {
       type: String,
-      required: [true, 'Name is required'],
+      required:  [true, "Name is required"],
       trim: true,
-      maxlength: [100, 'Name cannot exceed 100 characters']
     },
     role: {
-      type: String,
-      enum: ['admin', 'super_admin'],
-      default: 'admin'
-    }
+      type:  String,
+      enum: ["admin", "super_admin"],
+      default: "admin",
+    },
   },
   {
-    timestamps: true
+    timestamps: true,
   }
-);
+)
 
-// Create index for email
-AdminSchema.index({ email: 1 });
+// Add index separately
+AdminSchema.index({ email: 1 }, { unique: true })
 
-const Admin: Model<IAdmin> = mongoose.models.Admin || mongoose.model<IAdmin>('Admin', AdminSchema);
+const Admin: Model<IAdmin> =
+  mongoose.models.Admin || mongoose.model<IAdmin>("Admin", AdminSchema)
 
-export default Admin;
+export default Admin

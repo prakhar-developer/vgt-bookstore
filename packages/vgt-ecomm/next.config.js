@@ -8,6 +8,8 @@ const nextConfig = {
       },
     ],
   },
-};
+  // swcMinify is now default in Next. js 16 - REMOVE IT
+  // No experimental features needed
+}
 
-module.exports = nextConfig;
+module.exports = nextConfig

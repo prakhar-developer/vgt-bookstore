@@ -1,65 +1,79 @@
-import { NextRequest, NextResponse } from 'next/server';
-import { connectDB, Admin, comparePassword, generateToken } from '@/lib/shared';
+import { NextRequest, NextResponse } from "next/server"
+import connectDB from "../../../../../shared/lib/mongodb"
+import { Admin } from "../../../../../shared/models"
+import { comparePassword, generateToken } from "../../../../../shared/lib/auth"
 
-export async function POST(request: NextRequest) {
+export async function POST(req: NextRequest) {
   try {
-    await connectDB();
+    await connectDB()
 
-    const { email, password } = await request.json();
+    const { email, password } = await req.json()
 
-    // Validate required fields
+    // Validate input
     if (!email || !password) {
-      return NextResponse.json(
-        { success: false, error: 'Email and password are required' },
+      return NextResponse. json(
+        { success: false, error: "Email and password are required" },
         { status: 400 }
-      );
+      )
     }
 
-    // Find admin
-    const admin = await Admin.findOne({ email: email.toLowerCase() });
+    // Find admin and EXPLICITLY SELECT PASSWORD (important!)
+    const admin = await Admin.findOne({ email: email. toLowerCase() }).select("+password")
+
     if (!admin) {
       return NextResponse.json(
-        { success: false, error: 'Invalid credentials' },
+        { success: false, error: "Invalid credentials" },
         { status: 401 }
-      );
+      )
     }
 
-    // Verify password
-    const isPasswordValid = await comparePassword(password, admin.password);
+    // Check if password exists
+    if (!admin.password) {
+      console.error("Admin password not found in database")
+      return NextResponse. json(
+        { success: false, error: "Invalid credentials" },
+        { status:  401 }
+      )
+    }
+
+    // Compare password
+    const isPasswordValid = await comparePassword(password, admin.password)
+
     if (!isPasswordValid) {
       return NextResponse.json(
-        { success: false, error: 'Invalid credentials' },
-        { status: 401 }
-      );
+        { success: false, error: "Invalid credentials" },
+        { status:  401 }
+      )
     }
 
-    // Generate token
+    // Generate JWT token
     const token = generateToken({
-      adminId: admin._id.toString(),
-      email: admin.email,
-      role: admin.role,
-    });
+      id: admin._id. toString(),
+      email: admin. email,
+      role: admin. role,
+    })
 
-    // Return admin info (without password)
-    const adminData = {
-      _id: admin._id,
-      email: admin.email,
-      name: admin.name,
-      role: admin.role,
-    };
-
+    // Return success with token and admin info
     return NextResponse.json({
       success: true,
       data: {
-        admin: adminData,
         token,
+        admin: {
+          id: admin._id,
+          email: admin.email,
+          name: admin.name,
+          role: admin.role,
+        },
       },
-    });
-  } catch (error: any) {
-    console.error('Login error:', error);
+    })
+  } catch (error:  any) {
+    console.error("Login error:", error)
     return NextResponse.json(
-      { success: false, error: error.message || 'Login failed' },
+      {
+        success: false,
+        error: error.message || "Login failed",
+      },
       { status: 500 }
-    );
+    )
   }
 }

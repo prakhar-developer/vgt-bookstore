@@ -1,75 +1,67 @@
-import mongoose, { Schema, Model } from 'mongoose';
-import { IOrder } from '../types';
+import mongoose, { Schema, Model } from "mongoose"
+import { IOrder } from "../types"
 
 const OrderSchema = new Schema<IOrder>(
   {
     orderId: {
       type: String,
-      required: [true, 'Order ID is required'],
-      unique: true,
-      trim: true
+      required: true,
+      // Remove unique from here
     },
     bookId: {
       type: String,
-      required: [true, 'Book ID is required']
+      required: true,
+      ref: "Book",
     },
     customerName: {
       type: String,
-      required: [true, 'Customer name is required'],
+      required: [true, "Customer name is required"],
       trim: true,
-      maxlength: [100, 'Customer name cannot exceed 100 characters']
     },
     customerEmail: {
       type: String,
-      required: [true, 'Customer email is required'],
-      trim: true,
+      required: [true, "Customer email is required"],
       lowercase: true,
-      match: [/^\S+@\S+\.\S+$/, 'Please provide a valid email address']
+      trim: true,
     },
     customerPhone: {
       type: String,
-      required: [true, 'Customer phone is required'],
-      trim: true
+      required: [true, "Customer phone is required"],
     },
     customerAddress: {
       type: String,
-      required: [true, 'Customer address is required'],
-      trim: true
+      required: [true, "Customer address is required"],
     },
     price: {
       type: Number,
-      required: [true, 'Price is required'],
-      min: [0, 'Price cannot be negative']
+      required: true,
+      min: 0,
     },
     paymentScreenshot: {
       type: String,
-      required: [true, 'Payment screenshot is required']
+      required: [true, "Payment screenshot is required"],
     },
     status: {
       type: String,
-      enum: ['pending', 'verified', 'dispatched', 'delivered', 'cancelled'],
-      default: 'pending'
+      enum: ["pending", "verified", "dispatched", "delivered", "cancelled"],
+      default: "pending",
     },
-    trackingNumber: {
+    trackingNumber:  {
       type: String,
-      trim: true
     },
     notes: {
       type: String,
-      trim: true
-    }
+    },
   },
   {
-    timestamps: true
+    timestamps:  true,
   }
-);
+)
 
-// Create indexes
-OrderSchema.index({ orderId: 1 });
-OrderSchema.index({ customerEmail: 1 });
-OrderSchema.index({ status: 1 });
-OrderSchema.index({ createdAt: -1 });
+// Define index separately
+OrderSchema.index({ orderId: 1 }, { unique: true })
 
-const Order: Model<IOrder> = mongoose.models.Order || mongoose.model<IOrder>('Order', OrderSchema);
+const Order: Model<IOrder> =
+  mongoose.models.Order || mongoose.model<IOrder>("Order", OrderSchema)
 
-export default Order;
+export default Order

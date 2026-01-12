@@ -20,5 +20,8 @@
     "mongodb"
   ],
   "author": "VGT Bookstore",
-  "license": "MIT"
+  "license": "MIT",
+  "dependencies": {
+    "dotenv": "^17.2.3"
+  }
 }
