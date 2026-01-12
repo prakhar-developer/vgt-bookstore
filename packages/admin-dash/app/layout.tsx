@@ -5,6 +5,11 @@ import { Toaster } from 'sonner';
 export const metadata: Metadata = {
   title: 'VGT Bookstore - Admin Dashboard',
   description: 'Manage your bookstore with VGT Admin Dashboard',
+  icons: {
+    icon: '/vgt.png',
+    shortcut: '/vgt.png',
+    apple: '/vgt.png',
+  },
 };
 
 export default function RootLayout({
