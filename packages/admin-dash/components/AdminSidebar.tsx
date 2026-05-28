@@ -2,7 +2,7 @@
 
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { LayoutDashboard, BookOpen, ShoppingCart, Tag, LogOut } from 'lucide-react';
+import { LayoutDashboard, BookOpen, ShoppingCart, Tag, Users, LogOut, BarChart3, Star } from 'lucide-react';
 import { useAuthStore } from '@/lib/store/authStore';
 import { toast } from 'sonner';
 
@@ -26,6 +26,21 @@ const menuItems = [
     name: 'Categories',
     href: '/dashboard/categories',
     icon: Tag,
+  },
+  {
+    name: 'Customers',
+    href: '/dashboard/customers',
+    icon: Users,
+  },
+  {
+    name: 'Analytics',
+    href: '/dashboard/analytics',
+    icon: BarChart3,
+  },
+  {
+    name: 'Reviews',
+    href: '/dashboard/reviews',
+    icon: Star,
   },
 ];
 

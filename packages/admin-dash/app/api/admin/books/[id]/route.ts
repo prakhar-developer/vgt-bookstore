@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB, Book, verifyToken, extractTokenFromHeader } from '@/lib/shared';
 
+function normalizeBookPayload(body: Record<string, any>) {
+  const quantity = Number(body.quantity ?? 0);
+  return {
+    ...body,
+    quantity,
+    inStock: quantity > 0,
+  };
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: { id: string } }
@@ -21,7 +30,7 @@ export async function PUT(
 
     const book = await Book.findByIdAndUpdate(
       params.id,
-      body,
+      normalizeBookPayload(body),
       { new: true, runValidators: true }
     );
 

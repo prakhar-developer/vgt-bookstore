@@ -8,14 +8,20 @@ A complete, production-ready bookstore platform built with Next.js 14, MongoDB, 
 - 🏠 **Home Page**: Hero section, featured categories, featured books, and trust badges
 - 📖 **Browse Books**: Advanced filtering by category, price range, search, and sorting
 - 📝 **Book Details**: Comprehensive book information with metadata
-- 💳 **QR Payment Checkout**: Secure checkout with UPI QR code payment
+- 🤝 **Customer Accounts**: Login, registration, saved profile details, and order history
+- 🎯 **Similar Books**: Recommendation shelf on book pages based on catalog and purchase history
+- 🛒 **Cart + Multi-item Checkout**: Persisted cart with quantity controls and combined checkout totals
+- 💳 **Gateway Checkout**: Stripe checkout support when configured, with QR fallback for manual payment
 - 📸 **Payment Screenshot Upload**: Cloudinary integration for payment proof
+- 📊 **Behavior Tracking**: Book views, add-to-cart events, and purchase signals power recommendations
 - ✉️ **Email Notifications**: Order confirmation emails via Resend
 - 📱 **Responsive Design**: Mobile-first design that works on all devices
 
 ### Admin Dashboard (admin-dash)
 - 🔐 **Secure Login**: JWT-based authentication
-- 📊 **Dashboard**: Statistics and recent orders overview
+- 📊 **Dashboard**: Statistics, inventory alerts, and recent orders overview
+- 👥 **Customers View**: Registered and guest customer accounts with order activity
+- 📈 **Analytics**: Revenue, segments, low-stock books, and engagement signals
 - 📚 **Books Management**: Full CRUD operations with image upload
 - 📦 **Orders Management**: View, filter, and update order status
 - 🏷️ **Categories Management**: Create, edit, and delete categories
@@ -31,6 +37,7 @@ A complete, production-ready bookstore platform built with Next.js 14, MongoDB, 
 - **State Management**: Zustand with persistence
 - **File Upload**: Cloudinary
 - **Email**: Resend
+- **Payments**: Optional Stripe Checkout gateway
 - **HTTP Client**: Axios
 
 ## 📁 Project Structure
@@ -87,6 +94,7 @@ vgt-bookstore/
    NEXT_PUBLIC_CLOUDINARY_CLOUD_NAME=your_cloudinary_cloud_name
    NEXT_PUBLIC_CLOUDINARY_UPLOAD_PRESET=your_cloudinary_upload_preset
    RESEND_API_KEY=your_resend_api_key
+   STRIPE_SECRET_KEY=your_stripe_secret_key
    NEXT_PUBLIC_BASE_URL=http://localhost:3000
    ```
 
@@ -109,6 +117,7 @@ vgt-bookstore/
    This will create:
    - Default admin user (admin.vgt@gmail.com / Admin@12345)
    - Default categories (Fiction, Non-Fiction, Science & Technology, etc.)
+   - Demo customer account for storefront login
 
 5. **Run the applications**
 
@@ -129,6 +138,10 @@ vgt-bookstore/
 **Admin Dashboard:**
 - Email: `admin.vgt@gmail.com`
 - Password: `Admin@12345`
+
+**Customer Demo Account:**
+- Email: `reader.vgt@gmail.com`
+- Password: `Reader@12345`
 
 ## 🎨 Design System
 
@@ -163,6 +176,7 @@ npm run seed            # Seed database with initial data
 - JWT token authentication (7-day expiry)
 - Password hashing with bcrypt (10 rounds)
 - Protected admin API routes with token verification
+- Customer authentication with JWT, profile persistence, and order-linked history
 - Input validation on all forms
 - MongoDB connection string in environment variables
 - Secure file upload to Cloudinary
@@ -173,7 +187,15 @@ npm run seed            # Seed database with initial data
 - `GET /api/books` - Get all books with filters
 - `GET /api/books/[id]` - Get single book
 - `GET /api/categories` - Get all categories
+- `POST /api/events` - Track views, cart actions, and purchases
+- `POST /api/auth/register` - Register customer account
+- `POST /api/auth/login` - Login customer account
+- `GET /api/auth/me` - Get current customer profile
+- `GET /api/orders/history` - Get current customer order history
 - `POST /api/orders` - Create new order
+- `GET /api/recommendations` - Get similar/personalized book recommendations
+- `POST /api/payments/stripe` - Create Stripe payment session
+- `POST /api/payments/stripe/confirm` - Confirm Stripe payment and update order
 
 ### Protected Admin APIs
 - `POST /api/auth/login` - Admin login
@@ -187,6 +209,8 @@ npm run seed            # Seed database with initial data
 - `POST /api/admin/categories` - Create category
 - `PUT /api/admin/categories/[id]` - Update category
 - `DELETE /api/admin/categories/[id]` - Delete category
+- `GET /api/admin/customers` - Get customer directory and purchase summary
+- `GET /api/admin/analytics` - Get revenue, segments, and stock insights
 
 See [API_DOCUMENTATION.md](./API_DOCUMENTATION.md) for detailed API documentation.
 

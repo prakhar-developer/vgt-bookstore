@@ -6,7 +6,7 @@ import path from "path"
 // Load environment variables
 dotenv.config({ path: path.resolve(__dirname, "../.env") })
 
-import { Admin, Category } from "../models"
+import { Admin, Category, User } from "../models"
 
 const MONGODB_URI = process.env.MONGODB_URI
 
@@ -38,6 +38,27 @@ async function seed() {
       console.log("   Password: Admin@12345")
     } else {
       console.log("ℹ️  Admin user already exists")
+    }
+
+    // Create Demo Customer
+    const existingCustomer = await User.findOne({ email: "reader.vgt@gmail.com" })
+    if (!existingCustomer) {
+      const hashedPassword = await bcrypt.hash("Reader@12345", 10)
+      await User.create({
+        email: "reader.vgt@gmail.com",
+        password: hashedPassword,
+        name: "VGT Reader",
+        status: "registered",
+        phone: "+91 90000 90000",
+        address: "Mumbai, India",
+        preferredCategories: ["Programming", "Self Growth"],
+        favoriteAuthors: ["Robert C. Martin"],
+      })
+      console.log("✅ Demo customer created")
+      console.log("   Email: reader.vgt@gmail.com")
+      console.log("   Password: Reader@12345")
+    } else {
+      console.log("ℹ️  Demo customer already exists")
     }
 
     // Create Categories

@@ -4,16 +4,30 @@ import { useEffect, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { CheckCircle } from 'lucide-react';
+import axios from 'axios';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 
 function OrderSuccessContent() {
   const searchParams = useSearchParams();
   const orderId = searchParams.get('orderId');
+  const sessionId = searchParams.get('session_id');
 
   useEffect(() => {
-    // You can add analytics tracking here
-  }, []);
+    if (!orderId || !sessionId) {
+      return;
+    }
+
+    const confirmPayment = async () => {
+      try {
+        await axios.post('/api/payments/stripe/confirm', { orderId, sessionId });
+      } catch (error) {
+        console.error('Failed to confirm Stripe payment', error);
+      }
+    };
+
+    confirmPayment();
+  }, [orderId, sessionId]);
 
   return (
     <div className="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 py-16">

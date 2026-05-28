@@ -2,6 +2,7 @@
 
 import { useEffect, useState, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
+import Link from 'next/link';
 import axios from 'axios';
 import Image from 'next/image';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,18 +11,25 @@ import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
 import { Button } from '@/components/ui/button';
 import { toast } from 'sonner';
-import { QrCode, Upload } from 'lucide-react';
+import { QrCode, Upload, CreditCard } from 'lucide-react';
+import { useCustomerAuthStore } from '@/lib/store/authStore';
+import { useCartStore } from '@/lib/store/cartStore';
 
 function CheckoutForm() {
   const searchParams = useSearchParams();
   const router = useRouter();
   const bookId = searchParams.get('bookId');
+  const { customer, isAuthenticated } = useCustomerAuthStore();
+  const cartItems = useCartStore((state) => state.items);
+  const clearCart = useCartStore((state) => state.clearCart);
+  const sessionId = useCartStore((state) => state.sessionId);
 
   const [book, setBook] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [submitting, setSubmitting] = useState(false);
+  const [payingWithGateway, setPayingWithGateway] = useState(false);
   const [uploadingImage, setUploadingImage] = useState(false);
-  
+
   const [formData, setFormData] = useState({
     customerName: '',
     customerEmail: '',
@@ -30,13 +38,48 @@ function CheckoutForm() {
     paymentScreenshot: '',
   });
 
+  const checkoutItems = cartItems.length > 0
+    ? cartItems
+    : book
+    ? [{
+        bookId: book._id,
+        title: book.title,
+        author: book.author,
+        price: book.price,
+        coverImage: book.coverImage,
+        category: book.category,
+        quantity: 1,
+        inStock: (book.quantity ?? 0) > 0 || book.inStock,
+      }]
+    : [];
+
+  const subtotal = checkoutItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
+  const shippingFee = subtotal >= 999 ? 0 : subtotal > 0 ? 49 : 0;
+  const totalAmount = subtotal + shippingFee;
+
   useEffect(() => {
-    if (!bookId) {
+    if (customer) {
+      setFormData((prev) => ({
+        ...prev,
+        customerName: customer.name || prev.customerName,
+        customerEmail: customer.email || prev.customerEmail,
+        customerPhone: customer.phone || prev.customerPhone,
+        customerAddress: customer.address || prev.customerAddress,
+      }));
+    }
+  }, [customer]);
+
+  useEffect(() => {
+    if (!bookId && cartItems.length === 0) {
       router.push('/books');
       return;
     }
-    fetchBook();
-  }, [bookId]);
+    if (bookId) {
+      fetchBook();
+    } else {
+      setLoading(false);
+    }
+  }, [bookId, cartItems.length]);
 
   const fetchBook = async () => {
     try {
@@ -91,6 +134,24 @@ function CheckoutForm() {
     }
   };
 
+  const submitOrder = async (paymentMethod: 'qr' | 'stripe', paymentReference?: string) => {
+    const payload = {
+      ...formData,
+      bookId: bookId || checkoutItems[0]?.bookId,
+      items: checkoutItems.map((item) => ({ bookId: item.bookId, quantity: item.quantity })),
+      customerId: customer?.id,
+      paymentMethod,
+      paymentReference,
+      shippingFee,
+    };
+
+    const res = await axios.post('/api/orders', payload);
+    if (cartItems.length > 0) {
+      clearCart();
+    }
+    return res.data.data;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
@@ -101,17 +162,39 @@ function CheckoutForm() {
 
     try {
       setSubmitting(true);
-      const res = await axios.post('/api/orders', {
-        ...formData,
-        bookId,
-      });
+      const result = await submitOrder('qr');
 
       toast.success('Order placed successfully!');
-      router.push(`/order-success?orderId=${res.data.data.orderId}`);
+      router.push(`/order-success?orderId=${result.orderId}`);
     } catch (error: any) {
       toast.error(error.response?.data?.error || 'Failed to place order');
     } finally {
       setSubmitting(false);
+    }
+  };
+
+  const handleGatewayPayment = async () => {
+    try {
+      setPayingWithGateway(true);
+      const response = await axios.post('/api/payments/stripe', {
+        items: checkoutItems.map((item) => ({ bookId: item.bookId, quantity: item.quantity })),
+        customerName: formData.customerName,
+        customerEmail: formData.customerEmail,
+        customerPhone: formData.customerPhone,
+        customerAddress: formData.customerAddress,
+        customerId: customer?.id,
+      });
+
+      if (response.data?.data?.url) {
+        window.location.href = response.data.data.url;
+        return;
+      }
+
+      toast.error('Payment gateway is not configured yet');
+    } catch (error: any) {
+      toast.error(error.response?.data?.error || 'Failed to create payment session');
+    } finally {
+      setPayingWithGateway(false);
     }
   };
 
@@ -124,12 +207,33 @@ function CheckoutForm() {
   }
 
   if (!book) {
-    return null;
+    if (cartItems.length === 0) {
+      return null;
+    }
   }
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       <h1 className="text-3xl font-bold text-vgt-dark mb-8">Checkout</h1>
+
+      {!isAuthenticated && (
+        <Card className="mb-6 border-dashed">
+          <CardContent className="p-4 flex items-center justify-between gap-4">
+            <div>
+              <p className="font-semibold text-vgt-dark">Sign in for faster checkout</p>
+              <p className="text-sm text-gray-600">Your profile details will auto-fill and orders will be linked to your account.</p>
+            </div>
+            <div className="flex gap-2">
+              <Link href="/login">
+                <Button variant="outline">Login</Button>
+              </Link>
+              <Link href="/register">
+                <Button>Register</Button>
+              </Link>
+            </div>
+          </CardContent>
+        </Card>
+      )}
 
       <div className="grid md:grid-cols-2 gap-8">
         {/* Order Summary */}
@@ -139,34 +243,39 @@ function CheckoutForm() {
               <CardTitle>Order Summary</CardTitle>
             </CardHeader>
             <CardContent>
-              <div className="flex space-x-4 mb-6">
-                <div className="relative h-32 w-24 flex-shrink-0">
-                  <Image
-                    src={book.coverImage}
-                    alt={book.title}
-                    fill
-                    className="object-cover rounded"
-                  />
-                </div>
-                <div>
-                  <h3 className="font-semibold text-lg mb-1">{book.title}</h3>
-                  <p className="text-sm text-gray-600 mb-2">{book.author}</p>
-                  <p className="text-xl font-bold text-vgt-primary">₹{book.price}</p>
-                </div>
+              <div className="space-y-4 mb-6">
+                {checkoutItems.map((item) => (
+                  <div key={item.bookId} className="flex space-x-4">
+                    <div className="relative h-32 w-24 flex-shrink-0">
+                      <Image
+                        src={item.coverImage}
+                        alt={item.title}
+                        fill
+                        className="object-cover rounded"
+                      />
+                    </div>
+                    <div>
+                      <h3 className="font-semibold text-lg mb-1">{item.title}</h3>
+                      <p className="text-sm text-gray-600 mb-1">{item.author}</p>
+                      <p className="text-sm text-gray-500 mb-2">Qty: {item.quantity}</p>
+                      <p className="text-xl font-bold text-vgt-primary">₹{item.price * item.quantity}</p>
+                    </div>
+                  </div>
+                ))}
               </div>
 
               <div className="border-t pt-4">
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">Subtotal:</span>
-                  <span className="font-semibold">₹{book.price}</span>
+                  <span className="font-semibold">₹{subtotal}</span>
                 </div>
                 <div className="flex justify-between mb-2">
                   <span className="text-gray-600">Delivery:</span>
-                  <span className="font-semibold">Free</span>
+                  <span className="font-semibold">{shippingFee === 0 ? 'Free' : `₹${shippingFee}`}</span>
                 </div>
                 <div className="flex justify-between text-lg font-bold mt-4 pt-4 border-t">
                   <span>Total:</span>
-                  <span className="text-vgt-primary">₹{book.price}</span>
+                  <span className="text-vgt-primary">₹{totalAmount}</span>
                 </div>
               </div>
             </CardContent>
@@ -188,7 +297,7 @@ function CheckoutForm() {
               </div>
               <div className="space-y-2 text-sm text-gray-700">
                 <p>1. Scan the QR code or use UPI ID</p>
-                <p>2. Pay ₹{book.price}</p>
+                <p>2. Pay ₹{totalAmount}</p>
                 <p>3. Take a screenshot of payment confirmation</p>
                 <p>4. Upload the screenshot below</p>
               </div>
@@ -300,14 +409,28 @@ function CheckoutForm() {
                   </div>
                 </div>
 
-                <Button
-                  type="submit"
-                  className="w-full"
-                  size="lg"
-                  disabled={submitting || uploadingImage}
-                >
-                  {submitting ? 'Placing Order...' : 'Place Order'}
-                </Button>
+                <div className="space-y-3">
+                  <Button
+                    type="submit"
+                    className="w-full"
+                    size="lg"
+                    disabled={submitting || uploadingImage}
+                  >
+                    {submitting ? 'Placing Order...' : 'Place Order with QR Payment'}
+                  </Button>
+
+                  <Button
+                    type="button"
+                    className="w-full"
+                    size="lg"
+                    variant="outline"
+                    onClick={handleGatewayPayment}
+                    disabled={payingWithGateway || submitting || checkoutItems.length === 0}
+                  >
+                    <CreditCard className="h-4 w-4 mr-2" />
+                    {payingWithGateway ? 'Opening Gateway...' : 'Pay with Gateway'}
+                  </Button>
+                </div>
               </form>
             </CardContent>
           </Card>

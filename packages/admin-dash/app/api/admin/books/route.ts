@@ -1,6 +1,15 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { connectDB, Book, verifyToken, extractTokenFromHeader } from '@/lib/shared';
 
+function normalizeBookPayload(body: Record<string, any>) {
+  const quantity = Number(body.quantity ?? 0);
+  return {
+    ...body,
+    quantity,
+    inStock: quantity > 0,
+  };
+}
+
 export async function GET(request: NextRequest) {
   try {
     // Verify authentication
@@ -44,7 +53,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
 
-    const book = await Book.create(body);
+    const book = await Book.create(normalizeBookPayload(body));
 
     return NextResponse.json({
       success: true,

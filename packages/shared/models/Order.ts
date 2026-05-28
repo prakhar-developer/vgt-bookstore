@@ -13,6 +13,24 @@ const OrderSchema = new Schema<IOrder>(
       required: true,
       ref: "Book",
     },
+    customerId: {
+      type: String,
+      ref: "User",
+    },
+    items: {
+      type: [
+        {
+          bookId: { type: String, required: true, ref: 'Book' },
+          title: { type: String, required: true },
+          author: { type: String, required: true },
+          coverImage: { type: String, required: true },
+          category: { type: String, required: true },
+          price: { type: Number, required: true, min: 0 },
+          quantity: { type: Number, required: true, min: 1 },
+        },
+      ],
+      default: [],
+    },
     customerName: {
       type: String,
       required: [true, "Customer name is required"],
@@ -37,9 +55,41 @@ const OrderSchema = new Schema<IOrder>(
       required: true,
       min: 0,
     },
+    subtotal: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    shippingFee: {
+      type: Number,
+      default: 0,
+      min: 0,
+    },
+    totalAmount: {
+      type: Number,
+      required: true,
+      min: 0,
+    },
+    paymentMethod: {
+      type: String,
+      enum: ['qr', 'stripe'],
+      default: 'qr',
+    },
+    paymentProvider: {
+      type: String,
+      enum: ['manual', 'stripe', 'qr'],
+      default: 'manual',
+    },
     paymentScreenshot: {
       type: String,
-      required: [true, "Payment screenshot is required"],
+    },
+    paymentReference: {
+      type: String,
+    },
+    paymentStatus: {
+      type: String,
+      enum: ['pending', 'paid', 'failed'],
+      default: 'pending',
     },
     status: {
       type: String,
@@ -48,6 +98,16 @@ const OrderSchema = new Schema<IOrder>(
     },
     trackingNumber:  {
       type: String,
+    },
+    shippingStatus: {
+      type: String,
+      enum: ['pending', 'packed', 'shipped', 'delivered', 'returned'],
+      default: 'pending',
+    },
+    refundStatus: {
+      type: String,
+      enum: ['none', 'requested', 'approved', 'rejected', 'processed'],
+      default: 'none',
     },
     notes: {
       type: String,

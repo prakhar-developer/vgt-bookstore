@@ -27,6 +27,7 @@ interface Book {
   isbn?: string;
   featured: boolean;
   inStock: boolean;
+  quantity?: number;
 }
 
 export default function BooksPage() {
@@ -49,6 +50,19 @@ export default function BooksPage() {
     isbn: '',
     featured: false,
     inStock: true,
+    quantity: 0,
+  });
+
+  const normalizeQuantity = (value: unknown) => {
+    const parsed = Number(value);
+    return Number.isFinite(parsed) && parsed > 0 ? Math.floor(parsed) : 0;
+  };
+
+  const hydrateFormData = (book: Book) => ({
+    ...book,
+    price: String(book.price ?? ''),
+    pages: String(book.pages ?? ''),
+    quantity: normalizeQuantity(book.quantity),
   });
 
   useEffect(() => {
@@ -80,7 +94,11 @@ export default function BooksPage() {
     const { name, value, type, checked } = e.target;
     setFormData((prev: any) => ({
       ...prev,
-      [name]: type === 'checkbox' ? checked : value,
+      [name]: type === 'checkbox'
+        ? checked
+        : name === 'price' || name === 'pages' || name === 'quantity'
+          ? normalizeQuantity(value)
+          : value,
     }));
   };
 
@@ -117,11 +135,23 @@ export default function BooksPage() {
     e.preventDefault();
 
     try {
+      const payload = {
+        ...formData,
+        price: Number(formData.price),
+        pages: Number(formData.pages),
+        quantity: Number(formData.quantity ?? 0),
+        inStock: Number(formData.quantity ?? 0) > 0,
+      };
+
       if (editingBook) {
-        await api.put(`/api/admin/books/${editingBook._id}`, formData);
+        const res = await api.put(`/api/admin/books/${editingBook._id}`, payload);
+        const updatedBook = res.data.data;
+        setBooks((current) => current.map((book) => (book._id === updatedBook._id ? updatedBook : book)));
         toast.success('Book updated successfully');
       } else {
-        await api.post('/api/admin/books', formData);
+        const res = await api.post('/api/admin/books', payload);
+        const createdBook = res.data.data;
+        setBooks((current) => [createdBook, ...current]);
         toast.success('Book created successfully');
       }
       
@@ -134,7 +164,7 @@ export default function BooksPage() {
 
   const handleEdit = (book: Book) => {
     setEditingBook(book);
-    setFormData(book);
+    setFormData(hydrateFormData(book));
     setShowModal(true);
   };
 
@@ -166,6 +196,7 @@ export default function BooksPage() {
       isbn: '',
       featured: false,
       inStock: true,
+      quantity: 0,
     });
   };
 
@@ -199,6 +230,7 @@ export default function BooksPage() {
               <h3 className="font-semibold text-lg line-clamp-1 mb-1">{book.title}</h3>
               <p className="text-sm text-gray-600 line-clamp-1 mb-2">{book.author}</p>
               <p className="text-lg font-bold text-vgt-primary mb-3">₹{book.price}</p>
+              <p className="text-sm text-gray-600 mb-3">Stock: {book.quantity ?? 0}</p>
               <div className="flex space-x-2">
                 <Button size="sm" variant="outline" onClick={() => handleEdit(book)}>
                   <Edit className="h-4 w-4" />
@@ -235,6 +267,18 @@ export default function BooksPage() {
                   <div>
                     <Label htmlFor="price">Price *</Label>
                     <Input id="price" name="price" type="number" value={formData.price} onChange={handleChange} required />
+                  </div>
+
+                  <div>
+                    <Label htmlFor="quantity">Quantity *</Label>
+                    <Input id="quantity" name="quantity" type="number" value={formData.quantity} onChange={handleChange} required />
+                  </div>
+
+                  <div className="col-span-2">
+                    <div className="rounded-lg border bg-gray-50 p-3 text-sm text-gray-700">
+                      Stock status is derived from quantity. Current status:{' '}
+                      <strong>{Number(formData.quantity ?? 0) > 0 ? 'In Stock' : 'Out of Stock'}</strong>
+                    </div>
                   </div>
                   
                   <div>
@@ -302,11 +346,6 @@ export default function BooksPage() {
                   <div className="flex items-center space-x-2">
                     <input type="checkbox" id="featured" name="featured" checked={formData.featured} onChange={handleChange} />
                     <Label htmlFor="featured">Featured</Label>
-                  </div>
-                  
-                  <div className="flex items-center space-x-2">
-                    <input type="checkbox" id="inStock" name="inStock" checked={formData.inStock} onChange={handleChange} />
-                    <Label htmlFor="inStock">In Stock</Label>
                   </div>
                 </div>
                 

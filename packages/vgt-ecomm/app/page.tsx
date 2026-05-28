@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import BookCard from '@/components/BookCard';
 import { BookOpen, Truck, Shield, HeadphonesIcon } from 'lucide-react';
+import RecommendationShelf from '@/components/RecommendationShelf';
 
 async function getFeaturedBooks() {
   try {
@@ -105,6 +106,8 @@ export default async function Home() {
           </div>
         )}
       </section>
+
+      <RecommendationShelf />
 
       {/* Trust Section */}
       <section className="bg-white py-16">

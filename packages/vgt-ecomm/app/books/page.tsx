@@ -17,6 +17,7 @@ interface Book {
   coverImage: string;
   category: string;
   inStock: boolean;
+  quantity?: number;
 }
 
 interface Category {

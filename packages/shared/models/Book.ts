@@ -54,6 +54,16 @@ const BookSchema = new Schema<IBook>(
       trim: true,
       sparse: true
     },
+    sku: {
+      type: String,
+      trim: true,
+      sparse: true
+    },
+    quantity: {
+      type: Number,
+      default: 0,
+      min: [0, 'Quantity cannot be negative']
+    },
     featured: {
       type: Boolean,
       default: false
@@ -73,6 +83,7 @@ BookSchema.index({ title: 'text', author: 'text' });
 BookSchema.index({ category: 1 });
 BookSchema.index({ featured: 1 });
 BookSchema.index({ price: 1 });
+BookSchema.index({ quantity: 1 });
 
 const Book: Model<IBook> = mongoose.models.Book || mongoose.model<IBook>('Book', BookSchema);
 

@@ -4,9 +4,8 @@ import { Mail, Phone, MapPin } from 'lucide-react';
 export default function Footer() {
   return (
     <footer className="bg-vgt-dark text-white mt-16">
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg: px-8 py-12">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-          {/* About */}
           <div>
             <h3 className="text-lg font-semibold mb-4">VGT Bookstore</h3>
             <p className="text-gray-300 text-sm">
@@ -14,12 +13,11 @@ export default function Footer() {
             </p>
           </div>
 
-          {/* Quick Links */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Quick Links</h3>
             <ul className="space-y-2 text-sm">
               <li>
-                <Link href="/" className="text-gray-300 hover: text-[#D4DE95] transition">
+                <Link href="/" className="text-gray-300 hover:text-[#D4DE95] transition">
                   Home
                 </Link>
               </li>
@@ -29,22 +27,26 @@ export default function Footer() {
                 </Link>
               </li>
               <li>
-                <Link href="/about" className="text-gray-300 hover:text-[#D4DE95] transition">
-                  About Us
+                <Link href="/privacy" className="text-gray-300 hover:text-[#D4DE95] transition">
+                  Privacy Policy
                 </Link>
               </li>
               <li>
-                <Link href="/contact" className="text-gray-300 hover:text-[#D4DE95] transition">
-                  Contact
+                <Link href="/terms" className="text-gray-300 hover:text-[#D4DE95] transition">
+                  Terms of Service
+                </Link>
+              </li>
+              <li>
+                <Link href="/returns" className="text-gray-300 hover:text-[#D4DE95] transition">
+                  Returns & Refunds
                 </Link>
               </li>
             </ul>
           </div>
 
-          {/* Contact */}
           <div>
             <h3 className="text-lg font-semibold mb-4">Contact Us</h3>
-            <ul className="space-y-3 text-sm">
+            <ul className="space-y-2 text-sm">
               <li className="flex items-center space-x-2">
                 <Mail className="h-4 w-4 text-[#D4DE95]" />
                 <span className="text-gray-300">support@vgtbookstore.com</span>
