@@ -47,6 +47,13 @@ export async function POST(request: NextRequest) {
           status: 'registered',
         });
 
+    if (!user) {
+      return NextResponse.json(
+        { success: false, error: 'Failed to create user account' },
+        { status: 500 }
+      );
+    }
+
     const token = generateToken({
       id: user._id.toString(),
       email: user.email,
