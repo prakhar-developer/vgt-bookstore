@@ -7,9 +7,7 @@ function buildStripeClient() {
     return null;
   }
 
-  return new Stripe(process.env.STRIPE_SECRET_KEY, {
-    apiVersion: '2025-04-30.basil' as Stripe.LatestApiVersion,
-  });
+  return new Stripe(process.env.STRIPE_SECRET_KEY);
 }
 
 export async function POST(request: NextRequest) {
